@@ -272,5 +272,5 @@ class myRNN(Recurrent):
 
 
 
-model = visualize_rnn_1()
+train_rnn_1()
 
