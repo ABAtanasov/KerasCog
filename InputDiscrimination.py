@@ -12,13 +12,13 @@ from keras.callbacks import ModelCheckpoint
 from matplotlib import pyplot as plt
 
 
-def rnn_1(weights_path = None):
+def rnn_1(weights_path = None, nb_neurons = 100):
 
     inputs = Input(shape=(5000, 2))
 
     #note: want to add noise before relu in recurrent connection, do this by tweaking SimpleRNN
 
-    rnn = myRNN(return_sequences = True, output_dim = 100, activation='relu', consume_less = 'gpu', unroll=True)(inputs)
+    rnn = myRNN(return_sequences = True, output_dim = nb_neurons, activation='relu', consume_less = 'mem', unroll=False)(inputs)
 
     outputs = TimeDistributed(Dense(2, activation = 'linear'))(rnn)
 
@@ -172,7 +172,7 @@ class myRNN(Recurrent):
             self.reset_states()
         else:
             # initial states: all-zero tensor of shape (output_dim)
-            self.states = [None]
+            self.states =  [K.random_normal(shape=(self.output_dim,), mean=0.,std=0.1)]
         input_dim = input_shape[2]
         self.input_dim = input_dim
 
