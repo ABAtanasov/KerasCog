@@ -92,7 +92,7 @@ def train_rnn_1():
 
     model = rnn_1()
 
-    checkpoint = ModelCheckpoint('weights/rnn_weights_{epoch:02d}_{val_loss:.2f}.h5')
+    checkpoint = ModelCheckpoint('rnn_weights_{epoch:02d}_{val_loss:.2f}.h5')
 
     model.fit_generator(generate_input_batch(20, 2000, 5000), samples_per_epoch=1000, nb_epoch = 20, 
 		validation_data = generate_input_batch(20, 2000, 5000), nb_val_samples = 200, callbacks=[checkpoint])
@@ -114,7 +114,7 @@ def visualize_rnn_1():
     X = np.expand_dims(X, 0)
     print 2
 
-    model = rnn_1('weights/rnn_weights_00_0.68.h5')
+    model = rnn_1('rnn_weights_00_0.68.h5')
     print 3
     out = model.predict(X)
     print 4
