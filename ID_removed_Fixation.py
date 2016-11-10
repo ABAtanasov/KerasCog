@@ -66,27 +66,29 @@ def create_input_output_pair(first_fire_neuron, second_fire_neuron, delay, lengt
 
 
 def generate_input_batch(batch_size, delay, length):
-    #this masks the cost function
+
+	#this masks the cost function
     sample_weights = np.zeros((batch_size, length))
     non_zero = range(1500+delay, length)
     sample_weights[:, non_zero] = np.ones((batch_size, (length - 1500 - delay)))
 
-	while True:
-		X = np.zeros((batch_size, length, 2))
-		y = np.zeros((batch_size, length, 2))
-		for i in range(batch_size):
-			if i % 4 == 0:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(0,0,delay, length)
-			elif i % 4 == 1:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(0,1,delay, length)
-			elif i % 4 == 2:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(1,0,delay, length)
-			else:
+    while True:
+        X = np.zeros((batch_size, length, 2))
+        y = np.zeros((batch_size, length, 2))
+        for i in range(batch_size):
+            if i % 4 == 0:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(0,0,delay, length)
+            elif i % 4 == 1:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(0,1,delay, length)
+            elif i % 4 == 2:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(1,0,delay, length)
+            else:
 				X[i,:,:], y[i,:,:] = create_input_output_pair(1,1,delay, length)
-
-		yield X,y,sample_weights
-
-
+                
+                
+        yield X,y,sample_weights
+        
+        
 def train_rnn_1():
 
     model = rnn_1()
