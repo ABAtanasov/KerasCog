@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 from keras.layers.wrappers import TimeDistributed
 from keras.engine.topology import Layer, InputSpec
 from keras.callbacks import ModelCheckpoint
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 
 def rnn_1(weights_path = None, nb_neurons = 100):
