@@ -20,7 +20,8 @@ def rnn_1(weights_path = None, nb_neurons = 100):
 
     rnn = myRNN(return_sequences = True, output_dim = nb_neurons, activation='relu', consume_less = 'mem', unroll=False)(inputs)
 
-    outputs = TimeDistributed(Dense(2, activation = 'linear'))(rnn)
+    # We may not want to incorporate outputs
+    outputs = TimeDistributed(Dense(2, activation = 'sigmoid'))(rnn)
 
     model = Model(input=inputs, output=outputs)
 
@@ -66,27 +67,29 @@ def create_input_output_pair(first_fire_neuron, second_fire_neuron, delay, lengt
 
 
 def generate_input_batch(batch_size, delay, length):
-    #this masks the cost function
+
+	#this masks the cost function
     sample_weights = np.zeros((batch_size, length))
     non_zero = range(1500+delay, length)
     sample_weights[:, non_zero] = np.ones((batch_size, (length - 1500 - delay)))
 
-	while True:
-		X = np.zeros((batch_size, length, 2))
-		y = np.zeros((batch_size, length, 2))
-		for i in range(batch_size):
-			if i % 4 == 0:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(0,0,delay, length)
-			elif i % 4 == 1:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(0,1,delay, length)
-			elif i % 4 == 2:
-				X[i,:,:], y[i,:,:] = create_input_output_pair(1,0,delay, length)
-			else:
+    while True:
+        X = np.zeros((batch_size, length, 2))
+        y = np.zeros((batch_size, length, 2))
+        for i in range(batch_size):
+            if i % 4 == 0:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(0,0,delay, length)
+            elif i % 4 == 1:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(0,1,delay, length)
+            elif i % 4 == 2:
+                X[i,:,:], y[i,:,:] = create_input_output_pair(1,0,delay, length)
+            else:
 				X[i,:,:], y[i,:,:] = create_input_output_pair(1,1,delay, length)
-
-		yield X,y,sample_weights
-
-
+                
+                
+        yield X,y,sample_weights
+        
+        
 def train_rnn_1():
 
     model = rnn_1()
@@ -95,31 +98,6 @@ def train_rnn_1():
 
     model.fit_generator(generate_input_batch(20, 2000, 5000), samples_per_epoch=1000, nb_epoch = 20, 
 		validation_data = generate_input_batch(20, 2000, 5000), nb_val_samples = 200, callbacks=[checkpoint])
-
-    return
-
-
-def visualize_rnn_1():
-
-    X,y = create_input_output_pair(0, 1, 2000, 5000);
-    
-    plt.plot(range(5000), X[:,0], 'y', range(5000), X[:,1], 'r',range(5000), y[:,0], 'b',range(5000), y[:,1], 'g')
-    plt.show()
-
-    plt.plot(range(5000), y[:,0], 'b',range(5000), y[:,1], 'g')
-    plt.show()
-
-    print 1
-    X = np.expand_dims(X, 0)
-    print 2
-
-    model = rnn_1('../weights/rnn_weights_00_0.68.h5')
-    print 3
-    out = model.predict(X)
-    print 4
-
-    plt.plot(range(5000), out[0,:,0], 'b',range(5000), out[0,:,1], 'g')
-    plt.show()
 
     return
 
@@ -160,9 +138,18 @@ class myRNN(Recurrent):
         self.U_regularizer = regularizers.get(U_regularizer)
         self.b_regularizer = regularizers.get(b_regularizer)
         self.dropout_W, self.dropout_U = dropout_W, dropout_U
+        
+        # Implementing Dale's law
+        dales_vector = np.ones()
+        for i in range(4*output_dim/5, output_dim):
+            dales_vector[i] = -1
+            
+        diagonal_mask = np.diag(dales_vector)
+        self.diag = K.variable(diagonal_mask)
 
         if self.dropout_W or self.dropout_U:
             self.uses_learning_phase = True
+            
         super(myRNN, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -233,7 +220,9 @@ class myRNN(Recurrent):
 
         #THIS IS THE PART WE CHANGED, CHECK SIGMA
 
-        output = self.activation(h + K.dot(prev_output * B_U, self.U) + K.random_normal(shape=K.shape(self.b), mean=0.,std=0.1))
+        output = self.activation(h + K.dot(prev_output * B_U, 
+                            #Changed:
+                                    K.dot(abs(self.U), self.diag)) f+ K.random_normal(shape=K.shape(self.b), mean=0.,std=0.1))
         return output, [output]
 
     def get_constants(self, x):
