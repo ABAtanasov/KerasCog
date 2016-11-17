@@ -1,6 +1,5 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import TimeDistributed, SimpleRNN, Dense
 import theano
@@ -71,7 +70,7 @@ def train_xor(x_train, y_train, params):
     model = Sequential()
     model.add(myRNN(input_dim=2, output_dim=nb_rec, return_sequences=True, activation='relu'))
     model.add(TimeDistributed(Dense(output_dim=1, activation='sigmoid')))
-    model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss='mse', optimizer='Adam')
     model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32)
     return (model, params, x_train)
 
