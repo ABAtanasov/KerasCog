@@ -1,23 +1,17 @@
 
 import numpy as np
-from keras.models import Sequential
-from keras.layers import TimeDistributed, SimpleRNN, Dense
 import theano
-import scipy.linalg as la
-from keras.layers.core import Dense
-from keras.layers.recurrent import Recurrent, time_distributed_dense
-from keras import backend as K
-from keras import activations, initializations, regularizers
-from keras.models import Model
-from keras.layers import Input
-from keras.optimizers import Adam
-from keras.layers.wrappers import TimeDistributed
-from keras.engine.topology import Layer, InputSpec
-from keras.callbacks import ModelCheckpoint
-from matplotlib import pyplot as plt
-from new_layers import myRNN
 
-def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, first_in = 3, var_delay_length = 0, stim_noise = 0, sample_size = 256, epochs = 40, nb_rec = 50):
+from keras.models import Sequential
+from keras.layers import TimeDistributed, SimpleRNN, Dense, Input
+from keras.models import Model
+from keras.optimizers import Adam
+from matplotlib import pyplot as plt
+from keras.layers.noise import GaussianNoise
+
+from new_layers import noise_recurrent, leak_recurrent, newGaussianNoise
+
+def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, sample_size = 256, epochs = 40, nb_rec = 50):
     params = dict()
     params['first_input'] = first_in
     params['stim_dur'] = stim_dur
@@ -29,6 +23,7 @@ def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, first_in = 
     params['epochs'] = epochs
     params['sample_size'] = sample_size
     params['stim_noise'] = stim_noise
+    params['rec_noise'] =rec_noise
     assert params['first_input'] + params['stim_dur'] + params['mem_gap'] + params['stim_dur'] + params['out_gap'] < params['seq_dur'], 'malos parameteres'
     return params
 
@@ -68,9 +63,12 @@ def train_xor(x_train, y_train, params):
     epochs = params['epochs']
     sample_size = params['sample_size']
     nb_rec = params['nb_rec_neurons']
+    rec_noise = params['rec_noise']
+    
     model = Sequential()
-    model.add(myRNN(input_dim=2, output_dim=nb_rec, return_sequences=True, activation='relu'))
-    model.add(TimeDistributed(Dense(output_dim=1, activation='sigmoid')))
+    model.add(leak_recurrent(input_dim=2, output_dim=nb_rec, return_sequences=True, activation='relu',noise=0.1))
+    #model.add(newGaussianNoise(rec_noise))
+    model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
     
     model.compile(loss='mse', optimizer='Adam')
     model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32)
@@ -122,6 +120,8 @@ def get_maps(model, X_batch, layer = 0):
 
 
 def plot_eig(model, maps, t, condition = 0, color = [0, 0, 1]):
+    import scipy.linalg as la
+    
     w = get_weights(model)
     wrec = w[1]
     bin_maps = maps.astype('int')
