@@ -11,7 +11,9 @@ from keras.layers.noise import GaussianNoise
 
 from new_layers import noise_recurrent, leak_recurrent, newGaussianNoise
 
-def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, sample_size = 256, epochs = 40, nb_rec = 50):
+def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, 
+                    first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
+                    sample_size = 256, epochs = 40, nb_rec = 50):
     params = dict()
     params['first_input'] = first_in
     params['stim_dur'] = stim_dur

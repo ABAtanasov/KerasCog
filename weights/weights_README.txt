@@ -1,0 +1,1 @@
+This directory is meant for storing the train files for the weights. 
