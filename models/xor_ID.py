@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 from matplotlib import pyplot as plt
 from keras.layers.noise import GaussianNoise
 
-from new_layers import noise_recurrent, leak_recurrent, newGaussianNoise
+from networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, 
                     first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, 

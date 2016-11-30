@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 from matplotlib import pyplot as plt
 from keras.layers.noise import GaussianNoise
 
-from new_layers import noise_recurrent, leak_recurrent, newGaussianNoise
+from networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3, 
                     var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
@@ -62,12 +62,10 @@ def generate_trials(params):
             firing_neuron = np.random.randint(2)                # 0 or 1
             x_train[sample, 
                     input_times[turn] :(input_times[turn] + stim_dur), 
-                    firing_neuron] 
-                                        = 1
+                    firing_neuron] = 1
             y_train[sample, 
                     output_times[turn]:(input_times[turn] + turn_time[sample]),
-                    firing_neuron]
-                                        = 1
+                    firing_neuron] = 1
 
     x_train = x_train + stim_noise * np.random.randn(sample_size, seq_dur, 2)
     params['input_times']   = input_times
@@ -86,12 +84,16 @@ def train(x_train, y_train, params):
     
     
     # Fix this to make it recurrent:
-    model.add(input_dim = 2, output_dim = N_rec, return_sequences = True, activation = 'relu', noise = 0.1)
-    #model.add(leak_recurrent(input_dim=2, output_dim=N_rec, return_sequences=True, activation='relu',noise=0.1))
+    # model.add(input_dim = 2, output_dim = N_rec, return_sequences = True, activation = 'relu', noise = 0.1)
+    
+    # Daniel's way: (no noise in the leak layer)
+    model.add(leak_recurrent(input_dim=2, output_dim=nb_rec, return_sequences=True, activation='relu'))
+
 
     # We want to add rec_noise to our network: 
-    # Is this a problem??
-    model.add(newGaussianNoise(rec_noise)) 
+    # Is it better to not use Gaussian?
+    # model.add(newGaussianNoise(rec_noise)) 
+    
     
     model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
     
@@ -99,7 +101,6 @@ def train(x_train, y_train, params):
     model.compile(loss = 'binary_crossentropy', optimizer='Adam')
     model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32)
     return (model, params, x_train)
-
 
 
 
