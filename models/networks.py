@@ -30,7 +30,12 @@ class noise_recurrent(Recurrent):
         - [A Theoretically Grounded Application of Dropout in Recurrent Neural Networks](http://arxiv.org/abs/1512.05287)
     """
 
-    def __init__(self, output_dim, init = 'glorot_uniform', inner_init = 'orthogonal', activation = 'tanh', W_regularizer = None, U_regularizer = None, b_regularizer = None, dropout_W = 0.0, dropout_U = 0.0,noise=.1,dt=20, **kwargs):
+    def __init__(self, output_dim, 
+                    init = 'glorot_uniform', inner_init = 'orthogonal', 
+                    activation = 'tanh', 
+                    W_regularizer = None, U_regularizer = None, b_regularizer = None, 
+                    dropout_W = 0.0, dropout_U = 0.0,
+                    noise=.1, dt=20, **kwargs):
         self.output_dim = output_dim
         self.init = initializations.get(init)
         self.inner_init = initializations.get(inner_init)

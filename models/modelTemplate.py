@@ -6,7 +6,6 @@ from keras.models import Sequential
 from keras.layers import TimeDistributed, SimpleRNN, Dense, Input
 from keras.models import Model
 from keras.optimizers import Adam
-from matplotlib import pyplot as plt
 from keras.layers.noise import GaussianNoise
 
 
@@ -14,20 +13,29 @@ from keras.layers.noise import GaussianNoise
 # python script with information about all the network types
 from networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
-# Perhaps we just want to make each model a class? 
+# Worth considering:
+# Perhaps we just want to make each model a class?
 
-# For now users. This way we print all the information relating to the parameters of the model
+
+# ------------------------------------------------------------------
+# Print model parameters:
+# ------------------------------------------------------------------
 def print_params():
     pass
-
-# This sets the parameters explicitly, by giving arguments like N_rec, etc.
+# ------------------------------------------------------------------
+# Set model parameters:
+# ------------------------------------------------------------------
 def set_params():
     pass
 
-# This will generate a set of ideal behaviour for the network under various conditions
+# ------------------------------------------------------------------
+# Generate training data:
+# ------------------------------------------------------------------
 def generate_trials(params):
     pass
-    
-# This will be the method used to train the network
+
+# ------------------------------------------------------------------
+# Train!
+# ------------------------------------------------------------------
 def train():
     pass
