@@ -98,30 +98,6 @@ def train_rnn_1():
     return
 
 
-def visualize_rnn_1():
-
-    X,y = create_input_output_pair(0, 1, 2000, 5000);
-    
-    plt.plot(range(5000), X[:,0], 'y', range(5000), X[:,1], 'r',range(5000), y[:,0], 'b',range(5000), y[:,1], 'g')
-    plt.show()
-
-    plt.plot(range(5000), y[:,0], 'b',range(5000), y[:,1], 'g')
-    plt.show()
-
-    print 1
-    X = np.expand_dims(X, 0)
-    print 2
-
-    model = rnn_1('../weights/rnn_weights_00_0.68.h5')
-    print 3
-    out = model.predict(X)
-    print 4
-
-    plt.plot(range(5000), out[0,:,0], 'b',range(5000), out[0,:,1], 'g')
-    plt.show()
-
-    return
-
 
 
 class myRNN(Recurrent):
@@ -230,7 +206,7 @@ class myRNN(Recurrent):
         else:
             h = K.dot(x * B_W, self.W) + self.b
 
-        #THIS IS THE PART WE CHANGED, CHECK SIGMA
+        #THIS IS THE PART WE CHANGED, CHECK SIGMA 
 
         output = self.activation(h + K.dot(prev_output * B_U, self.U) + K.random_normal(shape=K.shape(self.b), mean=0.,std=0.1))
         return output, [output]

@@ -11,7 +11,7 @@ from keras.layers.noise import GaussianNoise
 
 # We want to import the neural network that we will be using from a global
 # python script with information about all the network types
-from networks import noise_recurrent, leak_recurrent, newGaussianNoise
+from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 # Worth considering:
 # Perhaps we just want to make each model a class?

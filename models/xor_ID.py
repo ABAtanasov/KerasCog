@@ -6,10 +6,11 @@ from keras.models import Sequential
 from keras.layers import TimeDistributed, SimpleRNN, Dense, Input
 from keras.models import Model
 from keras.optimizers import Adam
-from matplotlib import pyplot as plt
 from keras.layers.noise import GaussianNoise
+from keras.callbacks import ModelCheckpoint
+import matplotlib.pyplot as plt
 
-from networks import noise_recurrent, leak_recurrent, newGaussianNoise
+from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, 
                     first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
@@ -30,7 +31,7 @@ def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3,
     return params
 
 
-def gen_xor_data(params):
+def generate_trials(params):
     seq_dur = params['seq_dur']
     mem_gap = params['mem_gap']
     out_gap = params['out_gap']
@@ -61,7 +62,7 @@ def gen_xor_data(params):
     return (x_train, y_train, params)
 
 
-def train_xor(x_train, y_train, params):
+def train(x_train, y_train, params):
     epochs = params['epochs']
     sample_size = params['sample_size']
     nb_rec = params['nb_rec_neurons']
@@ -73,24 +74,35 @@ def train_xor(x_train, y_train, params):
     model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
     
     model.compile(loss='mse', optimizer='Adam')
-    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32)
+    
+    checkpoint = ModelCheckpoint('../weights/xor_weights-{epoch:02d}.h5')
+    
+    # TODO talk to Dave if we should replace this by fit_generator
+    
+    # NOTE I CHANGED THE BATCH SIZE TO 64
+    
+    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint])
     return (model, params, x_train)
-
 
 def run_xor(model, params):
     seq_dur = params['seq_dur']
     mem_gap = params['mem_gap']
     stim_dur = params['stim_dur']
     first_in = params['first_input']
-    second_in = params['second_input']
+    
     stim_dur = params['stim_dur']
     stim_noise = params['stim_noise']
+    
+    second_in = first_in + stim_dur + mem_gap
+    
     xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
     second_in = first_in + stim_dur + mem_gap
     x_pred = np.zeros([4, seq_dur, 2])
     for jj in np.arange(4):
         x_pred[jj, first_in:first_in + stim_dur, 0] = xor_seed[jj, 0]
-        x_pred[jj, second_in:second_in + stim_dur, 1] = xor_seed[jj, 1]
+        x_pred[jj, first_in:first_in + stim_dur, 1] = 1-xor_seed[jj, 0]
+        x_pred[jj, second_in:second_in + stim_dur, 0] = xor_seed[jj, 1]
+        x_pred[jj, second_in:second_in + stim_dur, 1] = 1-xor_seed[jj, 1]
 
     x_pred = x_pred + stim_noise * np.random.randn(4, seq_dur, 2)
     y_pred = model.predict(x_pred)
@@ -106,33 +118,11 @@ def run_xor(model, params):
     return (x_pred, y_pred)
 
 
-def get_activations(model, layer, X_batch):
-    get_activations = theano.function([model.layers[0].input], model.layers[layer].output, allow_input_downcast=True)
-    activations = get_activations(X_batch)
-    return activations
 
+params = set_params()
 
-def get_weights(model):
-    return model.layers[0].get_weights()
+trial_info = generate_trials(params)
 
+train_info = train(trial_info[0], trial_info[1], trial_info[2])
 
-def get_maps(model, X_batch, layer = 0):
-    activations = get_activations(model, layer, X_batch)
-    return activations == 0
-
-
-def plot_eig(model, maps, t, condition = 0, color = [0, 0, 1]):
-    import scipy.linalg as la
-    
-    w = get_weights(model)
-    wrec = w[1]
-    bin_maps = maps.astype('int')
-    bin_t = bin_maps[condition, t, :].reshape(np.shape(bin_maps)[2], 1)
-    bin_mask = bin_t.dot(bin_t.T)
-    eva = la.eig(wrec * bin_mask)
-    plt.scatter(eva[0].real, eva[0].imag, 12, color)
-    plt.xlabel('real')
-    plt.ylabel('imaginary')
-
-
-
+run_xor(train_info[0], train_info[1])

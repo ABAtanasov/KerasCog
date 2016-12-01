@@ -56,8 +56,10 @@ class noise_recurrent(Recurrent):
             self.reset_states()
         else:
             self.states = [K.random_normal(shape=(self.output_dim,), mean=0.0, std=0.5)]
+        
         input_dim = input_shape[2]
         self.input_dim = input_dim
+        
         self.W = self.init((input_dim, self.output_dim), name='{}_W'.format(self.name))
         self.U = self.inner_init((self.output_dim, self.output_dim), name='{}_U'.format(self.name))
         self.b = K.zeros((self.output_dim,), name='{}_b'.format(self.name))
@@ -80,9 +82,11 @@ class noise_recurrent(Recurrent):
         assert self.stateful, 'Layer must be stateful.'
         input_shape = self.input_spec[0].shape
         if not input_shape[0]:
-            raise Exception('If a RNN is stateful, a complete ' + 'input_shape must be provided (including batch size).')
+            raise Exception('If a RNN is stateful, a complete ' + 
+                            'input_shape must be provided (including batch size).')
         if hasattr(self, 'states'):
-            K.set_value(self.states[0], np.zeros((input_shape[0], self.output_dim)))
+            K.set_value(self.states[0], 
+                        np.zeros((input_shape[0], self.output_dim)))
         else:
             self.states = [K.zeros((input_shape[0], self.output_dim))]
 
@@ -91,7 +95,9 @@ class noise_recurrent(Recurrent):
             input_shape = self.input_spec[0].shape
             input_dim = input_shape[2]
             timesteps = input_shape[1]
-            return time_distributed_dense(x, self.W, self.b, self.dropout_W, input_dim, self.output_dim, timesteps)
+            return time_distributed_dense(x, self.W, self.b, self.dropout_W, 
+                                            input_dim, self.output_dim, 
+                                            timesteps)
         else:
             return x
 
@@ -103,7 +109,9 @@ class noise_recurrent(Recurrent):
             h = x
         else:
             h = K.dot(x * B_W, self.W) + self.b
-        output = self.activation(h + K.dot(prev_output * B_U, self.U)+ K.random_normal(shape=K.shape(self.b), mean=0.0, std=self.noise))
+        output = self.activation(h + 
+                                K.dot(prev_output * B_U, self.U) + 
+                                K.random_normal(shape=K.shape(self.b),mean=0.0, std=self.noise))
         return (output, [output])
 
     def get_constants(self, x):
@@ -143,29 +151,17 @@ class noise_recurrent(Recurrent):
 
 #Leaky Recurrent Layer
 class leak_recurrent(Recurrent):
-    """Fully-connected RNN where the output is to be fed back to input.
-    # Arguments
-        output_dim: dimension of the internal projections and the final output.
-        init: weight initialization function.
-            Can be the name of an existing function (str),
-            or a Theano function (see: [initializations](../initializations.md)).
-        inner_init: initialization function of the inner cells.
-        activation: activation function.
-            Can be the name of an existing function (str),
-            or a Theano function (see: [activations](../activations.md)).
-        W_regularizer: instance of [WeightRegularizer](../regularizers.md)
-            (eg. L1 or L2 regularization), applied to the input weights matrices.
-        U_regularizer: instance of [WeightRegularizer](../regularizers.md)
-            (eg. L1 or L2 regularization), applied to the recurrent weights matrices.
-        b_regularizer: instance of [WeightRegularizer](../regularizers.md),
-            applied to the bias.
-        dropout_W: float between 0 and 1. Fraction of the input units to drop for input gates.
-        dropout_U: float between 0 and 1. Fraction of the input units to drop for recurrent connections.
-    # References
-        - [A Theoretically Grounded Application of Dropout in Recurrent Neural Networks](http://arxiv.org/abs/1512.05287)
-    """
-
-    def __init__(self, output_dim, init = 'glorot_uniform', inner_init = 'orthogonal', activation = 'tanh', W_regularizer = None, U_regularizer = None, b_regularizer = None, dropout_W = 0.0, dropout_U = 0.0,tau=100,dt=20,noise=.1, **kwargs):
+    ''' Fully-connected RNN with output fed back into the input.
+        We implement a 'leak' on each neuron that dampens the signal 
+        depending on a time constant, tau
+    
+    '''
+    def __init__(self, output_dim, 
+                 init = 'glorot_uniform', inner_init = 'orthogonal',
+                 activation = 'tanh', W_regularizer = None, 
+                 U_regularizer = None, b_regularizer = None, 
+                 dropout_W = 0.0, dropout_U = 0.0,
+                 tau=100, dt=20, noise=.1, **kwargs):
         self.output_dim = output_dim
         self.init = initializations.get(init)
         self.inner_init = initializations.get(inner_init)
@@ -222,7 +218,9 @@ class leak_recurrent(Recurrent):
             input_shape = self.input_spec[0].shape
             input_dim = input_shape[2]
             timesteps = input_shape[1]
-            return time_distributed_dense(x, self.W, self.b, self.dropout_W, input_dim, self.output_dim, timesteps)
+            return time_distributed_dense(x, self.W, self.b, self.dropout_W, 
+                                          input_dim, self.output_dim, 
+                                          timesteps)
         else:
             return x
 
@@ -239,6 +237,7 @@ class leak_recurrent(Recurrent):
             h = x
         else:
             h = K.dot(x * B_W, self.W) + self.b
+        
         #Edit in leak, add noise
         output = prev_output*(1-alpha) + alpha*self.activation(h + (K.dot(prev_output * B_U, self.U) + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)))
         return (output, [output])
