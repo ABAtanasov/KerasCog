@@ -14,7 +14,7 @@ from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, 
                     first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
-                    sample_size = 256, epochs = 40, nb_rec = 50):
+                    sample_size = 512, epochs = 80, nb_rec = 50):
     params = dict()
     params['first_input'] = first_in
     params['stim_dur'] = stim_dur
@@ -79,9 +79,8 @@ def train(x_train, y_train, params):
     
     # TODO talk to Dave if we should replace this by fit_generator
     
-    # NOTE I CHANGED THE BATCH SIZE TO 64
     
-    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint])
+    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32, callbacks = [checkpoint])
     return (model, params, x_train)
 
 def run_xor(model, params):

@@ -57,3 +57,35 @@ def visualize_rnn_1(filename):
     plt.show()
 
     return
+
+
+# Daniels function, specific to the xor network:
+
+def run_xor(model, params):
+    seq_dur = params['seq_dur']
+    mem_gap = params['mem_gap']
+    stim_dur = params['stim_dur']
+    first_in = params['first_input']
+    second_in = params['second_input']
+    stim_dur = params['stim_dur']
+    stim_noise = params['stim_noise']
+    xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
+    second_in = first_in + stim_dur + mem_gap
+    x_pred = np.zeros([4, seq_dur, 2])
+    for jj in np.arange(4):
+        x_pred[jj, first_in:first_in + stim_dur, 0] = xor_seed[jj, 0]
+        x_pred[jj, second_in:second_in + stim_dur, 1] = xor_seed[jj, 1]
+
+    x_pred = x_pred + stim_noise * np.random.randn(4, seq_dur, 2)
+    y_pred = model.predict(x_pred)
+    plt.figure(121)
+    for ii in np.arange(4):
+        plt.subplot(2, 2, ii + 1)
+        plt.plot(y_pred[ii, :, 0])
+        plt.plot(x_pred[ii, :, :])
+        plt.ylim([-0.1, 1.1])
+        plt.title(str(xor_seed[ii, :]))
+
+    plt.show()
+    return (x_pred, y_pred)
+
