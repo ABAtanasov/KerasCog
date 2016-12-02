@@ -12,6 +12,8 @@ from keras.callbacks import ModelCheckpoint
 
 from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
+import matplotlib.pyplot as plt
+
 def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3, 
                     var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
                     sample_size = 512, epochs = 100, N_rec = 50):
@@ -79,7 +81,6 @@ def generate_trials(params):
     return (x_train, y_train, params)
 
 # This is the train function, using the Adam modified SGD method
-# NOT FINISHED: Consult Dave
 def train(x_train, y_train, params):
     epochs      = params['epochs']
     sample_size = params['sample_size']
@@ -88,18 +89,12 @@ def train(x_train, y_train, params):
     
     model = Sequential()
     
-    
-    # Fix this to make it recurrent:
-    # model.add(input_dim = 2, output_dim = N_rec, return_sequences = True, activation = 'relu', noise = 0.1)
-    
-    # Daniel's way: (no noise in the leak layer)
+    # Daniel's way, incorporating leakage: 
     model.add(leak_recurrent(input_dim=2, output_dim=N_rec, return_sequences=True, activation='relu'))
-
 
     # We want to add rec_noise to our network: 
     # Is it better to not use Gaussian?
     # model.add(newGaussianNoise(rec_noise)) 
-    
     
     model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
     
@@ -111,43 +106,51 @@ def train(x_train, y_train, params):
     model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint])
     return (model, params, x_train)
 
-def run_flipflop(model, params):
-    seq_dur = params['seq_dur']
-    mem_gap = params['mem_gap']
-    stim_dur = params['stim_dur']
-    first_in = params['first_input']
+def run_flipflop(model, params, x_train):
     
-    stim_dur = params['stim_dur']
-    stim_noise = params['stim_noise']
+    # quiet_gap = params['quiet_gap']
+ #    stim_dur = params['stim_dur']
+ #    first_in = params['first_input']
+ #    stim_dur = params['stim_dur']
+ #    stim_noise = params['stim_noise']
+ #    input_times = params['input_times']
+ #    ouput_times = params['input_times']
     
-    second_in = first_in + stim_dur + mem_gap
+    x_pred = x_train[0:4,:,:]
+    y_pred = model.predict(x_train)
     
-    xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
-    second_in = first_in + stim_dur + mem_gap
-    x_pred = np.zeros([4, seq_dur, 2])
-    for jj in np.arange(4):
-        x_pred[jj, first_in:first_in + stim_dur, 0] = xor_seed[jj, 0]
-        x_pred[jj, first_in:first_in + stim_dur, 1] = 1-xor_seed[jj, 0]
-        x_pred[jj, second_in:second_in + stim_dur, 0] = xor_seed[jj, 1]
-        x_pred[jj, second_in:second_in + stim_dur, 1] = 1-xor_seed[jj, 1]
-
-    x_pred = x_pred + stim_noise * np.random.randn(4, seq_dur, 2)
-    y_pred = model.predict(x_pred)
-    plt.figure(121)
-    for ii in np.arange(4):
-        plt.subplot(2, 2, ii + 1)
-        plt.plot(y_pred[ii, :, 0])
-        plt.plot(x_pred[ii, :, :])
-        plt.ylim([-0.1, 1.1])
-        plt.title(str(xor_seed[ii, :]))
-
+    plt.plot(x_pred[0, :, 0])
+    plt.plot(x_pred[0, :, 1])
+    plt.plot(y_pred[0, :, 0])
     plt.show()
-    return (x_pred, y_pred)
+    
+#   xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
+#     second_in = first_in + stim_dur + mem_gap
+#     x_pred = np.zeros([4, seq_dur, 2])
+#     for jj in np.arange(4):
+#         x_pred[jj, first_in:first_in + stim_dur, 0] = xor_seed[jj, 0]
+#         x_pred[jj, first_in:first_in + stim_dur, 1] = 1-xor_seed[jj, 0]
+#         x_pred[jj, second_in:second_in + stim_dur, 0] = xor_seed[jj, 1]
+#         x_pred[jj, second_in:second_in + stim_dur, 1] = 1-xor_seed[jj, 1]
+#
+#     x_pred = x_pred + stim_noise * np.random.randn(4, seq_dur, 2)
+#     y_pred = model.predict(x_pred)
+#     plt.figure(121)
+#     for ii in np.arange(4):
+#         plt.subplot(2, 2, ii + 1)
+#         plt.plot(y_pred[ii, :, 0])
+#         plt.plot(x_pred[ii, :, :])
+#         plt.ylim([-0.1, 1.1])
+#         plt.title(str(xor_seed[ii, :]))
+#
+#     plt.show()
+#     return (x_pred, y_pred)
 
 
-params = set_params()
+params = set_params(epochs=30,stim_dur = 100, quiet_gap = 200, nturns = 5, N_rec = 50)
 
 trial_info = generate_trials(params)
 
 train_info = train(trial_info[0], trial_info[1], trial_info[2])
 
+run_flipflop(train_info[0], train_info[1], train_info[2])
