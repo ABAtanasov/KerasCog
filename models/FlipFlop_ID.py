@@ -14,7 +14,7 @@ from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
 
 import matplotlib.pyplot as plt
 
-def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3, 
+def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3,
                     var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
                     sample_size = 512, epochs = 100, N_rec = 50):
     params = dict()
@@ -75,13 +75,17 @@ def generate_trials(params):
                     output_times[sample, turn]:(input_times[sample, turn] + turn_time[sample]),
                     0] = firing_neuron
 
+    mask = np.zeros((sample_size, seq_dur))
+    for sample in np.arange(sample_size):
+        mask[sample,:] = [0 if x == .5 else 1 for x in y_train[sample,:,:]]
+
     x_train = x_train + stim_noise * np.random.randn(sample_size, seq_dur, 2)
     params['input_times']   = input_times
     params['output_times']  = output_times
-    return (x_train, y_train, params)
+    return (x_train, y_train, params, mask)
 
 # This is the train function, using the Adam modified SGD method
-def train(x_train, y_train, params):
+def train(x_train, y_train, params, mask):
     epochs      = params['epochs']
     sample_size = params['sample_size']
     N_rec       = params['N_rec']
@@ -99,11 +103,11 @@ def train(x_train, y_train, params):
     model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
     
     # Note I'm not using mse, unlike Daniel's example. Try changing this if training is slow
-    model.compile(loss = 'mse', optimizer='Adam')
+    model.compile(loss = 'mse', optimizer='Adam', sample_weight_mode="temporal")
     
     checkpoint = ModelCheckpoint('../weights/flipflop_weights-{epoch:02d}.h5')
     
-    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint])
+    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint], sample_weight=mask)
     return (model, params, x_train)
 
 def run_flipflop(model, params, x_train):
@@ -147,10 +151,10 @@ def run_flipflop(model, params, x_train):
 #     return (x_pred, y_pred)
 
 
-params = set_params(epochs=30,stim_dur = 100, quiet_gap = 200, nturns = 5, N_rec = 50)
+params = set_params(epochs=20, input_wait=100, stim_dur = 100, quiet_gap = 200, nturns = 5, N_rec = 50)
 
 trial_info = generate_trials(params)
 
-train_info = train(trial_info[0], trial_info[1], trial_info[2])
+train_info = train(trial_info[0], trial_info[1], trial_info[2], trial_info[3])
 
 run_flipflop(train_info[0], train_info[1], train_info[2])
