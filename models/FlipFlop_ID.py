@@ -119,9 +119,11 @@ def run_flipflop(model, params, x_train):
  #    stim_noise = params['stim_noise']
  #    input_times = params['input_times']
  #    ouput_times = params['input_times']
-    
+
     x_pred = x_train[0:4,:,:]
     y_pred = model.predict(x_train)
+    print y_pred.shape
+    print x_pred.shape
     
     plt.plot(x_pred[0, :, 0])
     plt.plot(x_pred[0, :, 1])
