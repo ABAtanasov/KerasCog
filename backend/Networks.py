@@ -3,7 +3,6 @@ from keras.layers.recurrent import Recurrent, time_distributed_dense
 from keras import activations, initializations, regularizers
 from keras.engine.topology import Layer, InputSpec
 from keras import backend as K
-from keras.callbacks import ModelCheckpoint
 
 
 #Noisy Recurrent Layer
