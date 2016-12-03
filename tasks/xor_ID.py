@@ -1,18 +1,13 @@
-
-import numpy as np
-import theano
-
-from keras.models import Sequential
-from keras.layers import TimeDistributed, SimpleRNN, Dense, Input
-from keras.models import Model
-from keras.optimizers import Adam
-from keras.layers.noise import GaussianNoise
-from keras.callbacks import ModelCheckpoint
 import matplotlib.pyplot as plt
+import numpy as np
+from keras.callbacks import ModelCheckpoint
+from keras.layers import TimeDistributed, Dense
+from keras.models import Sequential
 
-from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
+from backend.Networks import leak_recurrent
 
-def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3, 
+
+def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3,
                     first_in = 3, var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
                     sample_size = 512, epochs = 80, nb_rec = 50):
     params = dict()

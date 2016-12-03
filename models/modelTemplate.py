@@ -1,41 +1,13 @@
+# Use the models directory to store different network architectures
 
-import numpy as np
-import theano
-
-from keras.models import Sequential
-from keras.layers import TimeDistributed, SimpleRNN, Dense, Input
-from keras.models import Model
-from keras.optimizers import Adam
-from keras.layers.noise import GaussianNoise
+# Note: it may be that we really only have one model architecture, in which
+# case this should probably be moved into the backend
 
 
-# We want to import the neural network that we will be using from a global
-# python script with information about all the network types
-from Networks import noise_recurrent, leak_recurrent, newGaussianNoise
+# function that returns a compiled Keras model
+# params: model parameters (number of neurons, inputs, outputs, etc)
 
-# Worth considering:
-# Perhaps we just want to make each model a class?
-
-
-# ------------------------------------------------------------------
-# Print model parameters:
-# ------------------------------------------------------------------
-def print_params():
-    pass
-# ------------------------------------------------------------------
-# Set model parameters:
-# ------------------------------------------------------------------
-def set_params():
+def model(params):
     pass
 
-# ------------------------------------------------------------------
-# Generate training data:
-# ------------------------------------------------------------------
-def generate_trials(params):
-    pass
 
-# ------------------------------------------------------------------
-# Train!
-# ------------------------------------------------------------------
-def train():
-    pass
