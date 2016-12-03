@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.callbacks import ModelCheckpoint
-from keras.layers import TimeDistributed, Dense
-from keras.models import Sequential
 
-from backend.Networks import leak_recurrent
+from models import danielsModel.model
 
 
 def set_params(seq_dur = 30, mem_gap = 4, out_gap = 3, stim_dur = 3,
@@ -59,16 +57,8 @@ def generate_trials(params):
 
 def train(x_train, y_train, params):
     epochs = params['epochs']
-    sample_size = params['sample_size']
-    nb_rec = params['nb_rec_neurons']
-    rec_noise = params['rec_noise']
     
-    model = Sequential()
-    model.add(leak_recurrent(input_dim=2, output_dim=nb_rec, return_sequences=True, activation='relu',noise=0.1))
-    #model.add(newGaussianNoise(rec_noise))
-    model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
-    
-    model.compile(loss='mse', optimizer='Adam')
+    model = danielsModel.model(params)
     
     checkpoint = ModelCheckpoint('../weights/xor_weights-{epoch:02d}.h5')
     
@@ -112,11 +102,12 @@ def run_xor(model, params):
     return (x_pred, y_pred)
 
 
+if __name__ == '__main__':
+    params = set_params()
 
-params = set_params()
+    trial_info = generate_trials(params)
 
-trial_info = generate_trials(params)
+    train_info = train(trial_info[0], trial_info[1], trial_info[2])
 
-train_info = train(trial_info[0], trial_info[1], trial_info[2])
+    run_xor(train_info[0], train_info[1])
 
-run_xor(train_info[0], train_info[1])

@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from keras.callbacks import ModelCheckpoint
-from keras.layers import TimeDistributed, Dense
-from keras.models import Sequential
 
-from backend.Networks import leak_recurrent
+from models import alexsModel.model
+from keras.callbacks import ModelCheckpoint
+
 
 def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3,
                     var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
@@ -78,24 +77,9 @@ def generate_trials(params):
 
 # This is the train function, using the Adam modified SGD method
 def train(x_train, y_train, params, mask):
-    epochs      = params['epochs']
-    sample_size = params['sample_size']
-    N_rec       = params['N_rec']
-    rec_noise   = params['rec_noise']
+    epochs = params['epochs']
     
-    model = Sequential()
-    
-    # Daniel's way, incorporating leakage: 
-    model.add(leak_recurrent(input_dim=2, output_dim=N_rec, return_sequences=True, activation='relu'))
-
-    # We want to add rec_noise to our network: 
-    # Is it better to not use Gaussian?
-    # model.add(newGaussianNoise(rec_noise)) 
-    
-    model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
-    
-    # Note I'm not using mse, unlike Daniel's example. Try changing this if training is slow
-    model.compile(loss = 'mse', optimizer='Adam', sample_weight_mode="temporal")
+    model = alexsModel.model(params)
     
     checkpoint = ModelCheckpoint('../weights/flipflop_weights-{epoch:02d}.h5')
     
@@ -145,10 +129,12 @@ def run_flipflop(model, params, x_train):
 #     return (x_pred, y_pred)
 
 
-params = set_params(epochs=20, input_wait=100, stim_dur = 100, quiet_gap = 200, nturns = 5, N_rec = 50)
+if __name__ == '__main__':
+    params = set_params(epochs=20, input_wait=100, stim_dur=100, quiet_gap=200, nturns=5, N_rec=50)
 
-trial_info = generate_trials(params)
+    trial_info = generate_trials(params)
 
-train_info = train(trial_info[0], trial_info[1], trial_info[2], trial_info[3])
+    train_info = train(trial_info[0], trial_info[1], trial_info[2], trial_info[3])
 
-run_flipflop(train_info[0], train_info[1], train_info[2])
+    run_flipflop(train_info[0], train_info[1], train_info[2])
+
