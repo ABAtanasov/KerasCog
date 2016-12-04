@@ -18,7 +18,7 @@ def model(params)
 
     model.add(TimeDistributed(Dense(output_dim=1, activation='linear')))
 
-    # Note I'm not using mse, unlike Daniel's example. Try changing this if training is slow
+    # Using mse, like in Daniel's example. Training is slow, for some reason, with binary_crossentropy
     model.compile(loss = 'mse', optimizer='Adam', sample_weight_mode="temporal")
 
     return model
