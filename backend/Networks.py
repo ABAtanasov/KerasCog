@@ -225,8 +225,6 @@ class leak_recurrent(Recurrent):
 
     def step(self, x, states):
         prev_output = states[0]
-        B_U = states[1]
-        B_W = states[2]
         tau = self.tau
         dt = self.dt
         noise = self.noise
@@ -235,14 +233,15 @@ class leak_recurrent(Recurrent):
         if self.consume_less == 'cpu':
             h = x
         else:
-            h = K.dot(x * B_W, self.W) + self.b 
+            h = K.dot(x , self.W) # + self.b
         
         # For our case, h = W * x is the input component fed in
         
         
         output = prev_output*(1-alpha) + \
-                 alpha*(h + K.dot(self.activation(prev_output) * B_U, self.U)) + \
+                 alpha*(h + K.dot(self.activation(prev_output) , self.U)) + \
                  K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
+
         return (output, [output])
 
     def get_constants(self, x):

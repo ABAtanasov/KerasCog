@@ -6,7 +6,7 @@ from keras.callbacks import ModelCheckpoint
 
 
 def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3,
-                    var_delay_length = 0, stim_noise = 0, rec_noise = .1, 
+                    var_delay_length = 0, stim_noise = 0, rec_noise = .1,
                     sample_size = 512, epochs = 100, N_rec = 50):
     params = dict()
     params['nturns']          = nturns
@@ -91,8 +91,6 @@ def run_flipflop(mod, params, x_train):
 
     x_pred = x_train[0:4,:,:]
     y_pred = mod.predict(x_train)
-    print y_pred.shape
-    print x_pred.shape
     
     plt.plot(x_pred[0, :, 0])
     plt.plot(x_pred[0, :, 1])
@@ -101,7 +99,8 @@ def run_flipflop(mod, params, x_train):
 
 
 if __name__ == '__main__':
-    params = set_params(epochs=20, input_wait=100, stim_dur=100, quiet_gap=200, nturns=5, N_rec=50)
+    params = set_params(epochs=20, input_wait=50, stim_dur=50, quiet_gap=100, nturns=5, N_rec=50, rec_noise=0.1,
+                        stim_noise=.1)
 
     trial_info = generate_trials(params)
 

@@ -10,7 +10,8 @@ def model(params):
     model = Sequential()
 
     # Incorporating leakiness in the neurons
-    model.add(leak_recurrent(input_dim=2, output_dim=params['N_rec'], return_sequences=True, activation='relu'))
+    model.add(leak_recurrent(input_dim=2, output_dim=params['N_rec'], return_sequences=True, activation='relu',
+                             noise=params['rec_noise'], consume_less='mem')
 
     # Before going directly to the output, we apply a relu to the signal FIRST and THEN sum THOSE signals
     # So this is the difference between W * [x]_+ (what we want) and [W * x]_+ (what we would have gotten)
