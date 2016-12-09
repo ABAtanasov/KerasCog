@@ -235,10 +235,15 @@ class leak_recurrent(Recurrent):
         if self.consume_less == 'cpu':
             h = x
         else:
-            h = K.dot(x * B_W, self.W) + self.b
+            h = K.dot(x * B_W, self.W) + self.b 
         
-        #Edit in leak, add noise
-        output = prev_output*(1-alpha) + alpha*self.activation(h + (K.dot(prev_output * B_U, self.U) + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)))
+        # For our case, h = W * x is the input component fed in
+        
+        
+        output = prev_output*(1-alpha) + \
+                 alpha*self.activation(h + \
+                                       K.dot(prev_output * B_U, self.U) + \
+                                       K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise))
         return (output, [output])
 
     def get_constants(self, x):
