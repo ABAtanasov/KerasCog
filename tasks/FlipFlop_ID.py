@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from models import alexsModel.model
+from models.alexsModel import model
 from keras.callbacks import ModelCheckpoint
 
 
@@ -79,25 +79,18 @@ def generate_trials(params):
 def train(x_train, y_train, params, mask):
     epochs = params['epochs']
     
-    model = alexsModel.model(params)
+    mod = model(params)
     
     checkpoint = ModelCheckpoint('../weights/flipflop_weights-{epoch:02d}.h5')
     
-    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint], sample_weight=mask)
-    return (model, params, x_train)
+    mod.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint], sample_weight=mask)
+    return (mod, params, x_train)
 
-def run_flipflop(model, params, x_train):
-    
-    # quiet_gap = params['quiet_gap']
- #    stim_dur = params['stim_dur']
- #    first_in = params['first_input']
- #    stim_dur = params['stim_dur']
- #    stim_noise = params['stim_noise']
- #    input_times = params['input_times']
- #    ouput_times = params['input_times']
+def run_flipflop(mod, params, x_train):
+
 
     x_pred = x_train[0:4,:,:]
-    y_pred = model.predict(x_train)
+    y_pred = mod.predict(x_train)
     print y_pred.shape
     print x_pred.shape
     
@@ -105,28 +98,6 @@ def run_flipflop(model, params, x_train):
     plt.plot(x_pred[0, :, 1])
     plt.plot(y_pred[0, :, 0])
     plt.show()
-    
-#   xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
-#     second_in = first_in + stim_dur + mem_gap
-#     x_pred = np.zeros([4, seq_dur, 2])
-#     for jj in np.arange(4):
-#         x_pred[jj, first_in:first_in + stim_dur, 0] = xor_seed[jj, 0]
-#         x_pred[jj, first_in:first_in + stim_dur, 1] = 1-xor_seed[jj, 0]
-#         x_pred[jj, second_in:second_in + stim_dur, 0] = xor_seed[jj, 1]
-#         x_pred[jj, second_in:second_in + stim_dur, 1] = 1-xor_seed[jj, 1]
-#
-#     x_pred = x_pred + stim_noise * np.random.randn(4, seq_dur, 2)
-#     y_pred = model.predict(x_pred)
-#     plt.figure(121)
-#     for ii in np.arange(4):
-#         plt.subplot(2, 2, ii + 1)
-#         plt.plot(y_pred[ii, :, 0])
-#         plt.plot(x_pred[ii, :, :])
-#         plt.ylim([-0.1, 1.1])
-#         plt.title(str(xor_seed[ii, :]))
-#
-#     plt.show()
-#     return (x_pred, y_pred)
 
 
 if __name__ == '__main__':

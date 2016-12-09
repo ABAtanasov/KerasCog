@@ -241,9 +241,8 @@ class leak_recurrent(Recurrent):
         
         
         output = prev_output*(1-alpha) + \
-                 alpha*self.activation(h + \
-                                       K.dot(prev_output * B_U, self.U) + \
-                                       K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise))
+                 alpha*(h + K.dot(self.activation(prev_output) * B_U, self.U)) + \
+                 K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
         return (output, [output])
 
     def get_constants(self, x):
