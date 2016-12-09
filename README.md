@@ -1,14 +1,16 @@
 # KerasCog
 Models for cognitive neural processes using Keras.io
 
+## Recent Updates:
+
+Fixed the step() function to implement leakiness and randomness in neurons
 
 ## Current Objectives:
 
-Fixing the step() function to successfully implement leakiness in neurons
 
-Checking that randomness is successfully being applied to neurons at each timestep. 
+Check that randomness/leak is successfully being applied to neurons at each timestep. 
 
-Comparing the efficiency of training in keras to pycog (see sgd first)
+Compare the efficiency of training in keras to pycog (see sgd first)
 
 Finish implementing Dale's law and applying to flip-flop
 
