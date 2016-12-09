@@ -160,7 +160,8 @@ class leak_recurrent(Recurrent):
                  activation = 'tanh', W_regularizer = None, 
                  U_regularizer = None, b_regularizer = None, 
                  dropout_W = 0.0, dropout_U = 0.0,
-                 tau=100, dt=20, noise=.1, **kwargs):
+                 tau=100, dt=20, noise=.1,
+                 dale_ratio = .8, **kwargs):
         self.output_dim = output_dim
         self.init = initializations.get(init)
         self.inner_init = initializations.get(inner_init)
@@ -172,6 +173,12 @@ class leak_recurrent(Recurrent):
         self.tau = tau
         self.dt = dt
         self.noise = noise
+        self.dale_ratio = dale_ratio
+        #make dales law matrix
+        dale_vec = np.ones(output_dim)
+        dale_vec[int(dale_ratio*output_dim):] = -1
+        dale = np.diag(dale_vec)
+        self.Dale = K.variable(dale)
         if self.dropout_W or self.dropout_U:
             self.uses_learning_phase = True
         super(leak_recurrent, self).__init__(**kwargs)
@@ -233,13 +240,13 @@ class leak_recurrent(Recurrent):
         if self.consume_less == 'cpu':
             h = x
         else:
-            h = K.dot(x , self.W) # + self.b
+            h = K.dot(x , K.abs(self.W)) # + self.b
         
         # For our case, h = W * x is the input component fed in
         
         
         output = prev_output*(1-alpha) + \
-                 alpha*(h + K.dot(self.activation(prev_output) , self.U)) + \
+                 alpha*(h + K.dot(self.activation(prev_output) , K.abs(self.U) * self.Dale)) + \
                  K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
 
         return (output, [output])
