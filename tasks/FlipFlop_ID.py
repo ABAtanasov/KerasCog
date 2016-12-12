@@ -99,8 +99,8 @@ def run_flipflop(mod, params, x_train):
 
 
 if __name__ == '__main__':
-    params = set_params(epochs=20, input_wait=50, stim_dur=50, quiet_gap=100, nturns=5, N_rec=50, rec_noise=0.1,
-                        stim_noise=.1)
+    params = set_params(epochs=20, input_wait=50, stim_dur=50, quiet_gap=100, nturns=5, N_rec=50, rec_noise=100,
+                        stim_noise=0)
 
     trial_info = generate_trials(params)
 

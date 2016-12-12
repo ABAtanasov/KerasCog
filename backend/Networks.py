@@ -188,7 +188,7 @@ class leak_recurrent(Recurrent):
         if self.stateful:
             self.reset_states()
         else:
-            self.states = [K.random_normal(shape=(self.output_dim,), mean=0.0, std=0.5)]
+            self.states = [K.random_normal(shape=(self.output_dim,), mean=0.5, std=0.5)]
         input_dim = input_shape[2]
         self.input_dim = input_dim
         self.W = self.init((input_dim, self.output_dim), name='{}_W'.format(self.name))
@@ -243,11 +243,13 @@ class leak_recurrent(Recurrent):
             h = K.dot(x , K.abs(self.W)) # + self.b
         
         # For our case, h = W * x is the input component fed in
-        
+
+        noise = self.noise * np.random.randn(self.output_dim)
+        noise = K.variable(noise)
         
         output = prev_output*(1-alpha) + \
                  alpha*(h + K.dot(self.activation(prev_output) , K.abs(self.U) * self.Dale)) + \
-                 K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
+                 noise#K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
 
         return (output, [output])
 
