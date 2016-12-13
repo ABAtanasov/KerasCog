@@ -163,7 +163,7 @@ class dense_output_with_mask(Dense):
     # output from the excitatory neurons
 
     def __init__(self, output_dim, init='glorot_uniform',
-                 activation=None, weights=None,
+                 activation='linear', weights=None,
                  W_regularizer=None, b_regularizer=None, activity_regularizer=None,
                  W_constraint=None, b_constraint=None,
                  bias=False, input_dim=None, dale_ratio = .8, **kwargs):
@@ -188,13 +188,14 @@ class dense_output_with_mask(Dense):
         if dale_ratio:
 
             #make dales law matrix
-            dale_vec = np.ones(output_dim)
-            dale_vec[int(dale_ratio*output_dim):] = 0
+            dale_vec = np.ones(input_dim)
+            dale_vec[int(dale_ratio*input_dim):] = 0
             dale = np.diag(dale_vec)
             self.Dale = K.variable(dale)
 
         if self.input_dim:
             kwargs['input_shape'] = (self.input_dim,)
+
         super(Dense, self).__init__(**kwargs)
 
     def build(self, input_shape):
