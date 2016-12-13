@@ -186,12 +186,10 @@ class dense_output_with_mask(Dense):
         # OUR CHANGE
         self.dale_ratio = dale_ratio
         if dale_ratio:
-
-            #make dales law matrix
-            dale_vec = np.ones(input_dim)
-            dale_vec[int(dale_ratio*input_dim):] = 0
+            dale_vec = np.ones((input_dim, 1))
+            dale_vec[int(dale_ratio*input_dim):, 0] = 0
             dale = np.diag(dale_vec)
-            self.Dale = K.variable(dale)
+            self.Dale = K.variable(dale_vec)
 
         if self.input_dim:
             kwargs['input_shape'] = (self.input_dim,)
@@ -201,6 +199,7 @@ class dense_output_with_mask(Dense):
     def build(self, input_shape):
         assert len(input_shape) == 2
         input_dim = input_shape[1]
+
         self.input_spec = [InputSpec(dtype=K.floatx(),
                                      shape=(None, input_dim))]
 
@@ -244,7 +243,10 @@ class dense_output_with_mask(Dense):
 
     def call(self, x, mask=None):
 
-        output = K.dot(x, K.abs(self.W) * self.Dale)
+        if self.dale_ratio:
+            output = K.dot(x, K.abs(self.W) * self.Dale)
+        else:
+            output = K.dot(x, self.W)
 
         return self.activation(output)
 

@@ -19,7 +19,7 @@ def model(params):
     model.add(Activation('relu'))
     
     # Output neuron
-    model.add(TimeDistributed(dense_output_with_mask(output_dim=1, activation='linear', dale_ratio=.8,
+    model.add(TimeDistributed(dense_output_with_mask(output_dim=1, activation='linear', dale_ratio=params['dale_ratio'],
                                                      input_dim=params['N_rec'])))
 
     # Using mse, like in Daniel's example. Training is slow, for some reason when using binary_crossentropy
