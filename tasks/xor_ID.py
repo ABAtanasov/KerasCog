@@ -5,8 +5,8 @@ from keras.callbacks import ModelCheckpoint
 from models.alexsModel import model
 
 
-def set_params(mem_gap = 15, out_gap = 5, stim_dur = 5,
-                    first_in = 3, var_delay_length = 0, stim_noise = 0.1, rec_noise = 0,
+def set_params(mem_gap = 50, out_gap = 50, stim_dur = 50,
+                    first_in = 30, var_delay_length = 0, stim_noise = 0.1, rec_noise = 0,
                     sample_size = 512, epochs = 100, N_rec = 50, tau = 100, dale_ratio=0.8):
     params = dict()
     params['first_input'] = first_in
@@ -48,7 +48,9 @@ def generate_trials(params):
     y_train = 0.5 * np.ones((sample_size, seq_dur, 1))
     for ii in np.arange(sample_size):
         x_train[ii, first_in:first_in + stim_dur, 0] = xor_seed[trial_types[ii], 0]
-        x_train[ii, second_in + var_delay[ii]:second_in + var_delay[ii] + stim_dur, 1] = xor_seed[trial_types[ii], 1]
+        x_train[ii, first_in:first_in + stim_dur, 1] = 1 - xor_seed[trial_types[ii], 0]
+        x_train[ii, second_in + var_delay[ii]:second_in + var_delay[ii] + stim_dur, 0] = xor_seed[trial_types[ii], 1]
+        x_train[ii, second_in + var_delay[ii]:second_in + var_delay[ii] + stim_dur, 1] = 1-xor_seed[trial_types[ii], 1]
         y_train[ii, out_t + var_delay[ii]:, 0] = xor_y[trial_types[ii]]
 
 
@@ -104,7 +106,7 @@ def run_xor(model, params):
     for ii in np.arange(4):
         plt.subplot(2, 2, ii + 1)
         plt.plot(y_pred[ii, :, 0])
-        plt.plot(y_pred0[ii, :, 0])
+        #plt.plot(y_pred0[ii, :, 0])
         plt.plot(x_pred[ii, :, :])
         plt.ylim([-0.1, 1.1])
         plt.title(str(xor_seed[ii, :]))
@@ -114,7 +116,8 @@ def run_xor(model, params):
 
 
 if __name__ == '__main__':
-    params = set_params(dale_ratio=None, tau=20)
+    params = set_params(epochs=50, sample_size= 512, N_rec=50, rec_noise=0.05,
+                        stim_noise=0.1, dale_ratio=0.8, tau=100)
 
     trial_info = generate_trials(params)
 
