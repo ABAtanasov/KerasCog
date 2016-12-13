@@ -113,13 +113,13 @@ class leak_recurrent(Recurrent):
 
         if(self.dale_ratio):
             output = prev_output*(1-alpha) + \
-                 alpha*(h + K.dot(self.activation(prev_output) , K.abs(self.U) * self.Dale))\
-            #     + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
+                 alpha*(h + K.dot(self.activation(prev_output) , K.abs(self.U) * self.Dale)) \
+                 + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
 
         else:
             output = prev_output * (1 - alpha) + \
                      alpha * (h + K.dot(self.activation(prev_output), self.U )) \
-                #     + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
+                     + K.random_normal(shape=K.shape(self.b), mean=0.0, std=noise)
 
         return (output, [output])
 

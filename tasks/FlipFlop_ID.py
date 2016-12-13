@@ -7,7 +7,7 @@ from keras.callbacks import ModelCheckpoint
 
 def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3,
                     var_delay_length = 0, stim_noise = 0, rec_noise = .1,
-                    sample_size = 512, epochs = 100, N_rec = 50, dale_ratio=0.8):
+                    sample_size = 512, epochs = 100, N_rec = 50, dale_ratio=0.8, tau=100):
     params = dict()
     params['nturns']          = nturns
     params['input_wait']       = input_wait
@@ -20,6 +20,7 @@ def set_params(nturns = 3, input_wait = 3, quiet_gap = 4, stim_dur = 3,
     params['epochs']           = epochs
     params['N_rec']            = N_rec
     params['dale_ratio']       = dale_ratio
+    params['tau'] = tau
 
     return params
 
@@ -100,8 +101,8 @@ def run_flipflop(mod, params, x_train):
 
 
 if __name__ == '__main__':
-    params = set_params(epochs=75, input_wait=50, stim_dur=50, quiet_gap=100, nturns=5, N_rec=50, rec_noise=0.0,
-                        stim_noise=0.1,dale_ratio=0.8)
+    params = set_params(epochs=75, input_wait=50, stim_dur=50, quiet_gap=100, nturns=5, N_rec=50, rec_noise=.1,
+                        stim_noise=0.1, dale_ratio=.8, tau=100)
 
     trial_info = generate_trials(params)
 
