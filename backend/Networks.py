@@ -1,6 +1,7 @@
 from __future__ import division
 from keras.layers.recurrent import Recurrent, time_distributed_dense
-from keras import activations, initializations, regularizers
+from keras.layers import Dense
+from keras import activations, initializations, regularizers, constraints
 from keras.engine.topology import Layer, InputSpec
 from keras import backend as K
 
@@ -156,6 +157,95 @@ class leak_recurrent(Recurrent):
         base_config = super(leak_recurrent, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+
+class dense_output_with_mask(Dense):
+    # same as a dense layer, but with output masking by dales law so we only see
+    # output from the excitatory neurons
+
+    def __init__(self, output_dim, init='glorot_uniform',
+                 activation=None, weights=None,
+                 W_regularizer=None, b_regularizer=None, activity_regularizer=None,
+                 W_constraint=None, b_constraint=None,
+                 bias=False, input_dim=None, dale_ratio = .8, **kwargs):
+        self.init = initializations.get(init)
+        self.activation = activations.get(activation)
+        self.output_dim = output_dim
+        self.input_dim = input_dim
+
+        self.W_regularizer = regularizers.get(W_regularizer)
+        self.b_regularizer = regularizers.get(b_regularizer)
+        self.activity_regularizer = regularizers.get(activity_regularizer)
+
+        self.W_constraint = constraints.get(W_constraint)
+        self.b_constraint = constraints.get(b_constraint)
+
+        self.bias = bias
+        self.initial_weights = weights
+        self.input_spec = [InputSpec(ndim=2)]
+
+        # OUR CHANGE
+        self.dale_ratio = dale_ratio
+        if dale_ratio:
+
+            #make dales law matrix
+            dale_vec = np.ones(output_dim)
+            dale_vec[int(dale_ratio*output_dim):] = 0
+            dale = np.diag(dale_vec)
+            self.Dale = K.variable(dale)
+
+        if self.input_dim:
+            kwargs['input_shape'] = (self.input_dim,)
+        super(Dense, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        assert len(input_shape) == 2
+        input_dim = input_shape[1]
+        self.input_spec = [InputSpec(dtype=K.floatx(),
+                                     shape=(None, input_dim))]
+
+        self.W = self.init((input_dim, self.output_dim),
+                           name='{}_W'.format(self.name))
+        if self.bias:
+            self.b = K.zeros((self.output_dim,),
+                             name='{}_b'.format(self.name))
+            self.trainable_weights = [self.W, self.b]
+        else:
+            self.trainable_weights = [self.W]
+
+        self.regularizers = []
+        if self.W_regularizer:
+            self.W_regularizer.set_param(self.W)
+            self.regularizers.append(self.W_regularizer)
+
+        if self.bias and self.b_regularizer:
+            self.b_regularizer.set_param(self.b)
+            self.regularizers.append(self.b_regularizer)
+
+        if self.activity_regularizer:
+            self.activity_regularizer.set_layer(self)
+            self.regularizers.append(self.activity_regularizer)
+
+        #OUR CHANGE
+        if self.dale_ratio:
+            self.non_trainable_weights = [self.Dale]
+
+        self.constraints = {}
+        if self.W_constraint:
+            self.constraints[self.W] = self.W_constraint
+        if self.bias and self.b_constraint:
+            self.constraints[self.b] = self.b_constraint
+
+        if self.initial_weights is not None:
+            self.set_weights(self.initial_weights)
+            del self.initial_weights
+        self.built = True
+
+
+    def call(self, x, mask=None):
+
+        output = K.dot(x, K.abs(self.W) * self.Dale)
+
+        return self.activation(output)
 
 class newGaussianNoise(Layer):
     '''Apply to the input an additive zero-centered Gaussian noise with

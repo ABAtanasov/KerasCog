@@ -4,7 +4,7 @@ from keras.layers import TimeDistributed, Dense, Activation
 from keras.models import Sequential
 from keras.constraints import maxnorm
 
-from backend.Networks import leak_recurrent
+from backend.Networks import leak_recurrent, dense_output_with_mask
 
 
 def model(params):
@@ -19,7 +19,7 @@ def model(params):
     model.add(Activation('relu'))
     
     # Output neuron
-    model.add(TimeDistributed(Dense(output_dim=1, activation='linear', b_constraint=maxnorm(m=0))))
+    model.add(TimeDistributed(dense_output_with_mask(output_dim=1, activation='linear', dale_ratio=.8)))
 
     # Using mse, like in Daniel's example. Training is slow, for some reason when using binary_crossentropy
     model.compile(loss = 'mse', optimizer='Adam', sample_weight_mode="temporal")
