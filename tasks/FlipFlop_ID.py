@@ -35,18 +35,17 @@ def generate_trials(params):
     stim_dur         = params['stim_dur']
     var_delay_length = params['var_delay_length']
     stim_noise       = params['stim_noise']
-    sample_size      = params['sample_size']
+    sample_size      = int(params['sample_size'])
     
     if var_delay_length == 0:
-        var_delay = np.zeros(sample_size)
+        var_delay = np.zeros(sample_size, dtype=int)
     else:
         var_delay = np.random.randint(var_delay_length, size=sample_size) + 1
+
+    input_times  = np.zeros([sample_size, nturns],dtype=np.int)
+    output_times = np.zeros([sample_size, nturns],dtype=np.int)
     
-    turn_times   = np.zeros(sample_size)
-    input_times  = np.zeros([sample_size, nturns])
-    output_times = np.zeros([sample_size, nturns])
-    
-    turn_time = np.zeros(sample_size)
+    turn_time = np.zeros(sample_size, dtype=np.int)
     
     for sample in np.arange(sample_size):
         turn_time[sample] =  stim_dur + quiet_gap + var_delay[sample]
@@ -54,7 +53,7 @@ def generate_trials(params):
             input_times[sample, i]  = input_wait + i * turn_time[sample]
             output_times[sample, i] = input_wait + i * turn_time[sample] + stim_dur
     
-    seq_dur = max([output_times[sample, nturns-1] + quiet_gap, sample in np.arange(sample_size)])
+    seq_dur = int(max([output_times[sample, nturns-1] + quiet_gap, sample in np.arange(sample_size)]))
     
     x_train = np.zeros([sample_size, seq_dur, 2])
     y_train = 0.5 * np.ones([sample_size, seq_dur, 1])
@@ -62,7 +61,7 @@ def generate_trials(params):
         for turn in np.arange(nturns):
             firing_neuron = np.random.randint(2)                # 0 or 1
             x_train[sample, 
-                    input_times[sample, turn]:(input_times[sample, turn] + stim_dur), 
+                    input_times[sample, turn]:(input_times[sample, turn] + stim_dur),
                     firing_neuron] = 1
             y_train[sample, 
                     output_times[sample, turn]:(input_times[sample, turn] + turn_time[sample]),

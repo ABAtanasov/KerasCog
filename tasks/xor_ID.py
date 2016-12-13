@@ -38,7 +38,7 @@ def generate_trials(params):
     xor_seed = np.array([[1, 1],[0, 1],[1, 0],[0, 0]])
     xor_y = np.array([0,1,1,0])
     if var_delay_length == 0:
-        var_delay = np.zeros(sample_size)
+        var_delay = np.zeros(sample_size, dtype=np.int)
     else:
         var_delay = np.random.randint(var_delay_length, size=sample_size) + 1
     second_in = first_in + stim_dur + mem_gap
