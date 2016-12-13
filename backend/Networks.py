@@ -188,7 +188,6 @@ class dense_output_with_mask(Dense):
         if dale_ratio:
             dale_vec = np.ones((input_dim, 1))
             dale_vec[int(dale_ratio*input_dim):, 0] = 0
-            dale = np.diag(dale_vec)
             self.Dale = K.variable(dale_vec)
 
         if self.input_dim:
