@@ -7,7 +7,7 @@ from keras.constraints import maxnorm
 from backend.Networks import leak_recurrent, dense_output_with_mask
 
 
-def model(params):
+def SimpleRecurrentModel(params):
     model = Sequential()
 
     # Incorporating leakiness in the neurons

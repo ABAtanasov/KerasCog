@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from models.alexsModel import model
+from models.SimpleRecurrent import SimpleRecurrentModel
 from keras.callbacks import ModelCheckpoint
 
 
@@ -80,18 +80,18 @@ def generate_trials(params):
 def train(x_train, y_train, params, mask):
     epochs = params['epochs']
     
-    mod = model(params)
+    model = SimpleRecurrentModel(params)
     
     checkpoint = ModelCheckpoint('../weights/flipflop_weights-{epoch:02d}.h5')
     
-    mod.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint], sample_weight=mask)
-    return (mod, params, x_train)
+    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=64, callbacks = [checkpoint], sample_weight=mask)
+    return (model, params, x_train)
 
-def run_flipflop(mod, params, x_train):
+def run_flipflop(model, params, x_train):
 
 
     x_pred = x_train[0:4,:,:]
-    y_pred = mod.predict(x_train)
+    y_pred = model.predict(x_train)
     
     plt.plot(x_pred[0, :, 0])
     plt.plot(x_pred[0, :, 1])

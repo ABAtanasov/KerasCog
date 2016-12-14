@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras.callbacks import ModelCheckpoint
 
-from models.alexsModel import model
+from models.SimpleRecurrent import SimpleRecurrentModel
 
 
 def set_params(mem_gap = 50, out_gap = 50, stim_dur = 50,
@@ -67,15 +67,15 @@ def generate_trials(params):
 def train(x_train, y_train, params, mask):
     epochs = params['epochs']
     
-    mod = model(params)
+    model = SimpleRecurrentModel(params)
     
     checkpoint = ModelCheckpoint('../weights/xor_weights-{epoch:02d}.h5')
     
     # TODO talk to Dave if we should replace this by fit_generator
     
     
-    mod.fit(x_train, y_train, nb_epoch=epochs, batch_size=32, callbacks = [checkpoint], sample_weight=mask)
-    return (mod, params, x_train, y_train)
+    model.fit(x_train, y_train, nb_epoch=epochs, batch_size=32, callbacks = [checkpoint], sample_weight=mask)
+    return (model, params, x_train, y_train)
 
 def run_xor(model, params):
     seq_dur = params['seq_dur']
