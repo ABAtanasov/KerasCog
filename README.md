@@ -1,7 +1,7 @@
 # KerasCog
 Models for cognitive neural processes using Keras.io
 
-The functionality of this package has been incorporated into the larger Murray Lab project [PsychRNN](https://github.com/dbehrlich/PsychRNN)
+The functionality of this package has been incorporated into the larger Murray Lab project [PsychRNN](https://github.com/dbehrlich/PsychRNN).
 Please check there for updates. 
 
 
