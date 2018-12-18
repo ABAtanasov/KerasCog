@@ -1,21 +1,9 @@
 # KerasCog
 Models for cognitive neural processes using Keras.io
 
-## Recent Updates:
+The functionality of this package has been incorporated into the larger Murray Lab project [PsychRNN](https://github.com/dbehrlich/PsychRNN)
+Please check there for updates. 
 
-Fixed the step() function to implement leakiness and randomness in neurons
-
-## Current Objectives:
-
-
-Check that randomness/leak is successfully being applied to neurons at each timestep. 
-
-Compare the efficiency of training in keras to pycog (see sgd first)
-
-Finish implementing Dale's law and applying to flip-flop
-
-
-**Keep in mind whenever making a model to make sure that the time-scale of the noise and exponential decay have a large enough time constant relative to the timescale set by the individual steps in the RNN's evolution.
 
 ## Citation
 
